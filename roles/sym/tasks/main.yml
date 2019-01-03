@@ -1,0 +1,24 @@
+- set_fact:
+    device: "{{ swvars[inventory_hostname] }}"
+    sym: "{{ swvars[inventory_hostname].sym }}"
+
+- name: Set up single-tenant symmetric VXLAN routing
+  nclu:
+    template: |
+     
+      {% if sym.vrfs is defined %} 
+      {% for x in sym.vrfs %}
+      add vrf {{ x }} vrf-table auto
+      add vrf {{ x }} vni {{ x.id }}
+      add vlan {{ x.vlan }} vrf {{ x }}
+      add vlan {{ x.vlan }} hwaddress {{ x.hwaddr }}
+     
+      add vxlan {{ x.vni }} vxlan id {{ x.id }}
+      add vxlan {{ x.vni }} bridge access {{ x.vlan }}
+      add vxlan {{ x.vni }} vxlan local-tunnelip {{ device.loopback }} 
+      add vxlan {{ x.vni }} bridge learning off
+      add vxlan {{ x.vni }} bridge arp-nd-suppress on
+      {% endfor %}
+      {% endif %}
+    
+    atomic: true
