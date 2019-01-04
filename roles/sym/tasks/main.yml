@@ -5,20 +5,20 @@
 - name: Set up single-tenant symmetric VXLAN routing
   nclu:
     template: |
-     
-      {% if sym.vrfs is defined %} 
+      
+      {% if sym.vrfs is defined %}
       {% for x in sym.vrfs %}
       add vrf {{ x }} vrf-table auto
-      add vrf {{ x }} vni {{ x.id }}
-      add vlan {{ x.vlan }} vrf {{ x }}
-      add vlan {{ x.vlan }} hwaddress {{ x.hwaddr }}
-     
-      add vxlan {{ x.vni }} vxlan id {{ x.id }}
-      add vxlan {{ x.vni }} bridge access {{ x.vlan }}
-      add vxlan {{ x.vni }} vxlan local-tunnelip {{ device.loopback|replace("/32", "") }}
-      add vxlan {{ x.vni }} bridge learning off
-      add vxlan {{ x.vni }} bridge arp-nd-suppress on
+      add vrf {{ x }} vni {{ sym.vrfs[x].id }}
+      add vlan {{ sym.vrfs[x].vlan }} vrf {{ x }}
+      add vlan {{ sym.vrfs[x].vlan }} hwaddress {{ sym.vrfs[x].hwaddr }}
+
+      add vxlan {{ sym.vrfs[x].vni }} vxlan id {{ sym.vrfs[x].id }}
+      add vxlan {{ sym.vrfs[x].vni }} bridge access {{ sym.vrfs[x].vlan }}
+      add vxlan {{ sym.vrfs[x].vni }} vxlan local-tunnelip {{ device.loopback|replace("/32", "") }}
+      add vxlan {{ sym.vrfs[x].vni }} bridge learning off
+      add vxlan {{ sym.vrfs[x].vni }} bridge arp-nd-suppress on
       {% endfor %}
       {% endif %}
-    
+
     atomic: true
